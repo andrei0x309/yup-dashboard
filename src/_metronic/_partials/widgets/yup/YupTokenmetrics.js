@@ -27,9 +27,17 @@ class YupTokenmetrics extends Component {
     this.getSupply = this.getSupply.bind(this);
     this.getGeckoData = this.getGeckoData.bind(this);
     this.getActionsCount = this.getActionsCount.bind(this);
+    this.dailyEmissions = null;
   }
 
   componentDidMount() {
+    const supplyWhenDeflationStarted = 116291;
+    const dateWhenDeflationStarted = new Date('25/10/2021');
+    const DateNow = new Date(Date.now());
+    const NumberOfDaysPassed = ~~((DateNow.getTime() - dateWhenDeflationStarted.getTime()) / (1000 * 3600 * 24));
+    this.dailyEmissions = supplyWhenDeflationStarted - 100 * NumberOfDaysPassed;
+    if (this.dailyEmissions <= 10000) this.dailyEmissions = 10000;
+
     this.getAllData();
     setInterval(this.getAllData, 30000);
   }
@@ -47,6 +55,7 @@ class YupTokenmetrics extends Component {
     });
   }
   async getSupply() {
+    // seem to give wrong data
     return new Promise((resolve, reject) => {
       fetch('https://api.eosn.io/v1/chain/get_currency_stats', {
         method: 'POST',
@@ -186,9 +195,10 @@ class YupTokenmetrics extends Component {
                       <h2 className="text-secondary d-block mb-0 pt-2 pb-2">
                         {supply.YUP.supply?.toFixed(0).numeral()} YUP
                       </h2>
-                      <span className="text-dark-50 font-weight-bold">
+                      {/* 
+                        <span className="text-dark-50 font-weight-bold">
                         /{supply.YUP.max_supply?.toFixed(0).numeral()} YUP Total
-                      </span>
+                      </span> */}
                     </td>
                     <td>
                       <span className="text-dark-25 font-weight-bolder d-block font-size-lg">Transactions</span>
@@ -197,9 +207,7 @@ class YupTokenmetrics extends Component {
                     </td>
                     <td>
                       <span className="text-dark-25 font-weight-bolder d-block font-size-lg">Daily distribution</span>
-                      <h2 className="text-secondary d-block mb-0 pt-2 pb-2">
-                        {(supply.YUP.supply * 0.0125)?.toFixed(0).numeral()} YUP
-                      </h2>
+                      <h2 className="text-secondary d-block mb-0 pt-2 pb-2">{this.dailyEmissions} YUP</h2>
                       <span className="text-dark-50 font-weight-bold">
                         ${(gecko.market_data.current_price.usd * supply.YUP.supply * 0.0125)?.toFixed(0).numeral()}
                       </span>
